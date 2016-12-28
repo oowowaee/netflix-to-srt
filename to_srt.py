@@ -3,7 +3,6 @@ import re
 import math
 import argparse
 
-
 def leading_zeros(value, digits=2):
     value = "000000" + str(value)
     return value[-digits:]
@@ -37,22 +36,10 @@ def to_srt(text):
     end_re = re.compile(u'end\="([0-9:\.]*)')
     # this regex was sometimes too strict. I hope the new one is never too lax
     # content_re = re.compile(u'xml\:id\=\"subtitle[0-9]+\">(.*)</p>')
-    content_re = re.compile(u'\">(.*)</p>')
-    alt_content_re = re.compile(u'<span style=\"[a-zA-Z0-9_]+\">(.*?)</span>')
-    br_re = re.compile(u'(<br\s*\/?>)+')
     fmt_t = True
     for s in sub_lines:
         content = []
-        alt_content = re.search(alt_content_re, s)
-        while (alt_content):  # background text may have additional styling.
-            # background may also contain several `<span> </span>` groups
-            s = s.replace(alt_content.group(0), alt_content.group(1))
-            alt_content = re.search(alt_content_re, s)
-        content = re.search(content_re, s).group(1)
-
-        br_tags = re.search(br_re, content)
-        if br_tags:
-            content = u"\n".join(content.split(br_tags.group()))
+        content = re.sub(u'<.*?>', ' ', s, re.UNICODE).strip()
 
         prev_start = prev_time["start"]
         start = re.search(start_re, s).group(1)
